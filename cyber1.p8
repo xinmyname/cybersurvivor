@@ -4,7 +4,7 @@ __lua__
 function _init()
 
 	hero={}
-	hero.x=80
+	hero.x=800
 	hero.y=80
 	hero.flip=false
 	hero.moving={{2,3},{3,3}}
@@ -41,28 +41,58 @@ function _update()
 end
 
 function _draw()
- local hx=64
- local hy=64
- local mx=hx-hero.x
- local my=hy-hero.y
+	local hx=64
+	local hy=64
+	local mx=hx-hero.x
+	local my=hy-hero.y
  
- if (mx>0) then
-  hx-=mx
-  if (hx<0) then 
-  	hx=0
-  	hero.x=0
-  end
-  mx=0
- end
- 
- palt(0,false)
+	if (mx>0) then
+		hx-=mx
+		if (hx<0) then 
+			hx=0
+			hero.x=0
+		end
+		mx=0
+	end
+
+	if (my>0) then
+		hy-=my
+		if (hy<0) then 
+			hy=0
+			hero.y=0
+		end
+		my=0
+	end
+
+	if (mx<-896) then
+		hx+=(hero.x-(hx+896))
+		if (hx>120) then
+			hx=120
+			hero.x=1016
+		end
+		mx=-896
+	end
+
+	if (my<-128) then
+		hy+=(hero.y-(hy+128))
+		if (hy>120) then
+			hy=120
+			hero.y=248
+		end
+		my=-128
+	end
+
+
+	palt(0,false)
 	map(0,0,mx,my)
- palt(0,true)
+	palt(0,true)
 	spr(hero.spr,hx,hy,1,1,hero.flip)
-	print("mx:"..mx,0,0)
-	print("my:"..my,0,8)
-	print("hx:"..hx,0,16)
-	print("hy:"..hy,0,24)
+	print("mx:"..mx,0,0,7)
+	print("my:"..my,0,8,7)
+	print("hx:"..hx,0,16,7)
+	print("hy:"..hy,0,24,7)
+	print("hero.x:"..hero.x,0,32,7)
+	print("hero.y:"..hero.y,0,40,7)
 	
 end
 
