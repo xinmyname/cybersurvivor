@@ -3,16 +3,16 @@ version 36
 __lua__
 function _init()
 
+	_max_w=1024
+	_max_h=256
+
 	_mx=0
 	_my=0
 
 	_hero=init_hero()
-	enemies={}
-	flocks={}
-
- for _=1,10 do
-	 add_enemy(rnd()*128,rnd()*128)
-	end
+	_flocks={}
+	
+	add_flock(64,10,64,64,128)
 end
 
 function _update()
@@ -21,8 +21,7 @@ function _update()
 
 	local b=btn()
 	update_hero(b)
-	foreach(enemies,update_enemy)
---	debug(collide(_hero,enemies[1],0.5,0.5))
+	foreach(_flocks,update_flock)
 end
 
 function _draw()
@@ -75,12 +74,13 @@ function _draw()
 	
 	draw_hero(hx,hy)
 	
-	foreach(enemies,draw_enemy)
+	foreach(_flocks,draw_flock)
 	
 	local dbg_y=0
 
 	for str in all(_dbg) do
-		print(str,0,dbg_y,7)
+		print(str,0,dbg_y,0)
+		print(str,1,dbg_y,7)
 		dbg_y+=8
 	end
 	
@@ -89,26 +89,26 @@ end
 -->8
 -- utilities
 
-function setani(ent,ani)
-	if (ani != ent.ani) then
-		ent.ani=ani
-		ent.ani_idx=1 
-		ent.spr=ani[1][1]
-		ent.wait=ani[1][2]
+function setani(en,ani)
+	if (ani != en.ani) then
+		en.ani=ani
+		en.ani_idx=1 
+		en.spr=ani[1][1]
+		en.wait=ani[1][2]
 	end
 end
 
-function animate(ent)
+function animate(en)
  
-	if (ent.wait>0) then
-		ent.wait-=1
+	if (en.wait>0) then
+		en.wait-=1
 	else
-		ent.ani_idx+=1
+		en.ani_idx+=1
 
-		if (ent.ani_idx>#ent.ani) ent.ani_idx=1
+		if (en.ani_idx>#en.ani) en.ani_idx=1
 
-		ent.spr=ent.ani[ent.ani_idx][1]
-		ent.wait=ent.ani[ent.ani_idx][2]
+		en.spr=en.ani[en.ani_idx][1]
+		en.wait=en.ani[en.ani_idx][2]
 	end
  
 end
@@ -135,6 +135,27 @@ end
 
 function debug(str)
 	add(_dbg,str)
+end
+
+function dist(this,that)
+	local a=that.x-this.x
+	local b=that.y-this.y
+	return sqrt(a*a+b*b)
+end
+
+function closest(this,ens)
+	local cen=nil
+	local cd=0x7fff.ffff
+	for that in all(ens) do
+		if (this!=that) then
+			local d=dist(this,that)
+			if (d>0 and d<cd) then
+				cen=that
+				cd=d
+			end
+		end
+	end
+	return cen
 end
 
 -->8
@@ -193,6 +214,8 @@ function update_hero(b)
 		_hero.y=ny
 	end
 
+	debug("hx:".._hero.x)
+	debug("hy:".._hero.y)
 	-- collision check?
 	
 	
@@ -224,27 +247,29 @@ end
 -->8
 -- enemies
 
-function add_enemy(x,y)
+function init_enemy(sp,x,y,flid)
 	local en={}
+	en.flid=flid
 	en.hp=2
 	en.x=x
 	en.y=y
 	en.flip=false
 	en.spd=0.5
-	en.moving={{64,3},{65,3}}
+	en.moving={{sp,3},{sp+1,3}}
 	en.target=_hero
 	setani(en,en.moving)	
-	add(enemies,en)
+	return en
 end
 
 function update_enemy(en)
 	
 	local ang=atan2((en.target.y)-en.y,(en.target.x)-en.x)
 	local dx=sin(ang)*en.spd
+	local dy=cos(ang)*en.spd
 
 	en.flip=(dx<0)
 	en.x+=dx
-	en.y+=cos(ang)*en.spd 
+	en.y+=dy
 
 	animate(en)
 	
@@ -258,6 +283,30 @@ end
 
 function draw_enemy(en)
 	spr(en.spr,_mx+en.x,_my+en.y,1,1,en.flip)
+end
+
+-->8
+-- flocks
+
+function add_flock(sp,num,cx,cy,r)
+	local fl={}
+	fl.id=#_flocks+1
+	fl.enemies={}	
+	for i=1,num do
+		local x=rnd()*r-r/2+cx
+		local y=rnd()*r-r/2+cy
+		local en=init_enemy(sp,x,y,fl.id)
+		add(fl.enemies,en)
+	end	
+	_flocks[fl.id]=fl
+end
+
+function update_flock(fl)
+	foreach(fl.enemies,update_enemy)
+end
+
+function draw_flock(fl)
+	foreach(fl.enemies,draw_enemy) 
 end
 
 __gfx__
