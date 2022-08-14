@@ -2,9 +2,9 @@ pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
 function _init()
- palt(0,false)
- poke(0x5f36,8)
- t=0
+	palt(0,false)
+	poke(0x5f36,8)
+	t=0
 end
 
 function _update()
@@ -13,29 +13,29 @@ function _update()
 end
 
 function _draw()
- cls()
- map(0,0,0,0,16,12)
- pal(0,1,1)
- pal(1,130,1)
- pal(2,2,1)
- pal(3,140,1)
- pal(4,129,1)
- pal(5,6,1)
- pal(6,0,1)
- pal(7,7,1)
- pal(8,14,1)
- pal(9,13,1)
- pal(10,5,1)
- pal(11,141,1)
- pal(12,134,1)
- pal(13,12,1)
- pal(14,133,1)
- pal(15,128,1)
- cprint("press ❎ to start",100,t%8+4)
+	cls()
+	map(0,0,0,0,16,12)
+	pal(0,1,1)
+	pal(1,130,1)
+	pal(2,2,1)
+	pal(3,140,1)
+	pal(4,129,1)
+	pal(5,6,1)
+	pal(6,0,1)
+	pal(7,7,1)
+	pal(8,14,1)
+	pal(9,13,1)
+	pal(10,5,1)
+	pal(11,141,1)
+	pal(12,134,1)
+	pal(13,12,1)
+	pal(14,133,1)
+	pal(15,128,1)
+	cprint("press ❎ to start",100,t%8+4)
 end
 
 function cprint(str,y,col)
- print(str,(#str*4)/2,y,col)
+	print(str,(#str*4)/2,y,col)
 end
 
 __gfx__

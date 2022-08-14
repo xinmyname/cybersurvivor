@@ -3,13 +3,16 @@ version 36
 __lua__
 function _init()
 
-	mx=0
-	my=0
+	_mx=0
+	_my=0
 
-	hero=init_hero()
+	_hero=init_hero()
 	enemies={}
+	flocks={}
 
-	add_enemy(2,5)
+ for _=1,10 do
+	 add_enemy(rnd()*128,rnd()*128)
+	end
 end
 
 function _update()
@@ -17,9 +20,9 @@ function _update()
 	_dbg={}
 
 	local b=btn()
-	update_hero(hero,b)
+	update_hero(b)
 	foreach(enemies,update_enemy)
-	debug(collide(hero,enemies[1],0.5,0.5))
+--	debug(collide(_hero,enemies[1],0.5,0.5))
 end
 
 function _draw()
@@ -27,50 +30,50 @@ function _draw()
 	local hx=64
 	local hy=64
 	
-	mx=hx-hero.x
-	my=hy-hero.y
+	_mx=hx-_hero.x
+	_my=hy-_hero.y
  
-	if (mx>0) then
-		hx-=mx
+	if (_mx>0) then
+		hx-=_mx
 		if (hx<0) then 
 			hx=0
-			hero.x=0
+			_hero.x=0
 		end
-		mx=0
+		_mx=0
 	end
 
-	if (my>0) then
-		hy-=my
+	if (_my>0) then
+		hy-=_my
 		if (hy<0) then 
 			hy=0
-			hero.y=0
+			_hero.y=0
 		end
-		my=0
+		_my=0
 	end
 
-	if (mx<-896) then
-		hx+=(hero.x-(hx+896))
+	if (_mx<-896) then
+		hx+=(_hero.x-(hx+896))
 		if (hx>120) then
 			hx=120
-			hero.x=1016
+			_hero.x=1016
 		end
-		mx=-896
+		_mx=-896
 	end
 
-	if (my<-128) then
-		hy+=(hero.y-(hy+128))
+	if (_my<-128) then
+		hy+=(_hero.y-(hy+128))
 		if (hy>120) then
 			hy=120
-			hero.y=248
+			_hero.y=248
 		end
-		my=-128
+		_my=-128
 	end
 
 	palt(0,false)
-	map(0,0,mx,my)
+	map(0,0,_mx,_my)
 	palt(0,true)
 	
-	draw_hero(hero,hx,hy)
+	draw_hero(hx,hy)
 	
 	foreach(enemies,draw_enemy)
 	
@@ -150,21 +153,21 @@ function init_hero()
 	return hero
 end
 
-function update_hero(hero,b)
+function update_hero(b)
 
-	local nx=hero.x
-	local ny=hero.y
+	local nx=_hero.x
+	local ny=_hero.y
 	local tx=0
 	local ty=0
 
 	if (band(b,1)==1) then
 	 nx-=1.5
-		hero.flip=true
+		_hero.flip=true
 	end
 	
 	if (band(b,2)==2) then
 		nx+=1.5
-		hero.flip=false
+		_hero.flip=false
 	end
 
 	if (band(b,4)==4) then
@@ -186,8 +189,8 @@ function update_hero(hero,b)
 	|        fget(mget(tr,tb))
 	
 	if (tv&1==0) then
-		hero.x=nx
-		hero.y=ny
+		_hero.x=nx
+		_hero.y=ny
 	end
 
 	-- collision check?
@@ -195,25 +198,25 @@ function update_hero(hero,b)
 	
 
 	if (b&0xf>0) then
-		setani(hero,hero.moving)
+		setani(_hero,_hero.moving)
 	else
-		setani(hero,hero.idle)
+		setani(_hero,_hero.idle)
 	end
 
-	animate(hero)
+	animate(_hero)
 
 end
 
-function draw_hero(hero,x,y)
+function draw_hero(x,y)
 	
-	spr(hero.spr,x,y,1,1,hero.flip)
+	spr(_hero.spr,x,y,1,1,_hero.flip)
 	line(x-2,y+9,x+10,y+9,7)
 	pset(x-2,y+10,6)
 	pset(x+10,y+10,6)
 	line(x-1,y+10,x+9,y+10,0)
 
 	line(x-1,y+10,
-		x+hero.hp/hero.max_hp*10-1,y+10,8)
+		x+_hero.hp/_hero.max_hp*10-1,y+10,8)
 
 	line(x-2,y+11,x+10,y+11,5)
 
@@ -224,12 +227,12 @@ end
 function add_enemy(x,y)
 	local en={}
 	en.hp=2
-	en.x=x*8
-	en.y=y*8
+	en.x=x
+	en.y=y
 	en.flip=false
 	en.spd=0.5
 	en.moving={{64,3},{65,3}}
-	en.target=hero
+	en.target=_hero
 	setani(en,en.moving)	
 	add(enemies,en)
 end
@@ -244,10 +247,17 @@ function update_enemy(en)
 	en.y+=cos(ang)*en.spd 
 
 	animate(en)
+	
+	local odx=0
+	local ody=0
+	for o in all(_enemies) do
+	 odx=o.x-en.x
+	 ody=o.y-en.y
+	end
 end
 
 function draw_enemy(en)
-	spr(en.spr,mx+en.x,my+en.y,1,1,en.flip)
+	spr(en.spr,_mx+en.x,_my+en.y,1,1,en.flip)
 end
 
 __gfx__
